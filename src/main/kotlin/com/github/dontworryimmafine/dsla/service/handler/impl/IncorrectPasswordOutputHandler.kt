@@ -4,12 +4,11 @@ import com.github.dontworryimmafine.dsla.model.MessageType
 import com.github.dontworryimmafine.dsla.model.ResultMessage
 import com.github.dontworryimmafine.dsla.service.handler.OutputHandler
 
-class IncorrectPasswordOutputHandler(override val next: OutputHandler? = null) : OutputHandler {
+class IncorrectPasswordOutputHandler : OutputHandler {
     override fun handle(output: List<String>): ResultMessage? {
-        output.lastOrNull { match(it) }?.let {
-            return ResultMessage(it, MessageType.INCORRECT_PASSWORD)
+        return output.lastOrNull { match(it) }?.let {
+            ResultMessage(it, MessageType.INCORRECT_PASSWORD)
         }
-        return proceed(output)
     }
 
     private fun match(line: String): Boolean =

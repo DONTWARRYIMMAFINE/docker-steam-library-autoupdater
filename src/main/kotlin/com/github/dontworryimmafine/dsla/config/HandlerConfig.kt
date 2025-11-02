@@ -9,21 +9,22 @@ import org.springframework.context.annotation.Configuration
 class HandlerConfig {
     @Bean
     fun defaultOutputHandler(): OutputHandler {
-        return NoCredentialCacheOutputHandler(
-            IncorrectPasswordOutputHandler(
-                SteamGuardTimeoutOutputHandler(
-                    ErrorOutputHandler(
-                        SuccessOutputHandler(
-                            LastLineOutputHandler()
-                        )
-                    )
-                )
-            )
+        return CompositeOutputHandler(
+            NoCredentialCacheOutputHandler(),
+            IncorrectPasswordOutputHandler(),
+            SteamGuardTimeoutOutputHandler(),
+            ErrorOutputHandler(),
+            AlreadyUpToDateOutputHandler(),
+            SuccessOutputHandler(),
+            LastLineOutputHandler()
         )
     }
 
     @Bean
     fun progressibleOutputHandler(): OutputHandler {
-        return DownloadOutputHandler(ValidationOutputHandler())
+        return CompositeOutputHandler(
+            DownloadOutputHandler(),
+            ValidationOutputHandler()
+        )
     }
 }

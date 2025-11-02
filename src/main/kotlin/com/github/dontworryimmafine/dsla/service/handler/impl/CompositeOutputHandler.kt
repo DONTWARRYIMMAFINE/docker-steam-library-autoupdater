@@ -1,12 +1,12 @@
 package com.github.dontworryimmafine.dsla.service.handler.impl
 
-import com.github.dontworryimmafine.dsla.model.MessageType
 import com.github.dontworryimmafine.dsla.model.ResultMessage
 import com.github.dontworryimmafine.dsla.service.handler.OutputHandler
 
-class LastLineOutputHandler : OutputHandler {
+class CompositeOutputHandler(
+    private vararg val handlers: OutputHandler
+) : OutputHandler {
     override fun handle(output: List<String>): ResultMessage? {
-        val message = output.lastOrNull() ?: return null
-        return ResultMessage(message, MessageType.ERROR)
+        return handlers.firstNotNullOfOrNull { it.handle(output) }
     }
 }
