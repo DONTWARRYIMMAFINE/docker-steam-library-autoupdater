@@ -6,6 +6,8 @@ spring:
   output:
     ansi:
       enabled: always
+  config:
+    import: optional:env/application.properties
 
 server:
   shutdown: graceful
