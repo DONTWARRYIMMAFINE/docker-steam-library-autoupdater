@@ -12,7 +12,6 @@ data class SteamProperties
         val password: String,
         val rootPath: String,
         val cmdRootPath: String,
-        val cmdFilterOutput: Boolean,
         val cmdValidateInstalled: Boolean,
         val appIdResolveStrategies: Set<AppIdResolveStrategyType>,
         val manualAppIds: Set<Long>,

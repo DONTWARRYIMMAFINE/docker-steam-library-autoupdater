@@ -4,12 +4,11 @@ import com.github.dontworryimmafine.dsla.model.MessageType
 import com.github.dontworryimmafine.dsla.model.ResultMessage
 import com.github.dontworryimmafine.dsla.service.handler.OutputHandler
 
-class SuccessOutputHandler(override val next: OutputHandler?) : OutputHandler {
+class SuccessOutputHandler : OutputHandler {
     override fun handle(output: List<String>): ResultMessage? {
-        output.lastOrNull { match(it) }?.let {
-            return ResultMessage(it, MessageType.SUCCESS)
+        return output.lastOrNull { match(it) }?.let {
+            ResultMessage(it, MessageType.SUCCESS)
         }
-        return proceed(output)
     }
 
     private fun match(line: String): Boolean =
