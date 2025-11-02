@@ -1,0 +1,17 @@
+package com.github.dontworryimmafine.dsla.service.handler.impl
+
+import com.github.dontworryimmafine.dsla.model.MessageType
+import com.github.dontworryimmafine.dsla.model.ResultMessage
+import com.github.dontworryimmafine.dsla.service.handler.OutputHandler
+
+class NoCredentialCacheOutputHandler(override val next: OutputHandler? = null) : OutputHandler {
+    override fun handle(output: List<String>): ResultMessage? {
+        output.lastOrNull { match(it) }?.let {
+            return ResultMessage(it, MessageType.NO_CREDENTIAL_CACHE)
+        }
+        return proceed(output)
+    }
+
+    private fun match(line: String): Boolean =
+        line.contains("no cached credentials", ignoreCase = true)
+}

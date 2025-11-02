@@ -1,12 +1,16 @@
 package com.github.dontworryimmafine.dsla.model
 
 data class ResultMessage(
-    val message: String,
-    val type: MessageType,
+    val message: String = "Unknown output",
+    val type: MessageType = MessageType.ERROR,
 )
 
 enum class MessageType {
-    INFO,
     SUCCESS,
-    ERROR
+    ERROR,
+    INCORRECT_PASSWORD,
+    STEAM_GUARD_TIMEOUT,
+    NO_CREDENTIAL_CACHE,
+    DOWNLOADING,
+    VALIDATING
 }

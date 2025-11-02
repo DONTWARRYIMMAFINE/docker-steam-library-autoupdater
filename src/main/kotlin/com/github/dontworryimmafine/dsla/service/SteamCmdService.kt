@@ -2,11 +2,10 @@ package com.github.dontworryimmafine.dsla.service
 
 import com.github.dontworryimmafine.dsla.config.properties.SteamProperties
 import com.github.dontworryimmafine.dsla.model.AppUpdateResult
-import com.github.dontworryimmafine.dsla.model.AppUpdateStatus
 import com.github.dontworryimmafine.dsla.model.MessageType
-import com.github.dontworryimmafine.dsla.model.SteamCmdProcessResult
+import com.github.dontworryimmafine.dsla.model.ResultMessage
 import com.github.dontworryimmafine.dsla.service.consumer.SteamCmdOutputConsumer
-import com.github.dontworryimmafine.dsla.utils.SteamCmdUtils
+import com.github.dontworryimmafine.dsla.service.handler.OutputHandler
 import jakarta.annotation.PreDestroy
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
@@ -18,7 +17,8 @@ import java.util.concurrent.atomic.AtomicReference
 class SteamCmdService(
     private val properties: SteamProperties,
     private val steamCmdCommandService: SteamCmdCommandService,
-    private val consumers: List<SteamCmdOutputConsumer>
+    private val consumers: List<SteamCmdOutputConsumer>,
+    private val defaultOutputHandler: OutputHandler
 ) {
     private val steamCmdProcess = AtomicReference<Process?>(null)
 
@@ -30,20 +30,25 @@ class SteamCmdService(
 
         logger.info("Starting updates for ${appIds.size} apps")
 
-        val results = appIds.map { appId ->
+        val results = mutableMapOf<Long, AppUpdateResult>()
+        for (appId in appIds) {
             logger.info("Starting update for appId: $appId")
-            updateApp(appId)
-        }.associateBy { it.appId }
+            val result = updateApp(appId)
+            results[appId] = result
 
-        val success = results.values.filter { it.status == AppUpdateStatus.SUCCESS }
-        val failed = results.values.filter { it.status == AppUpdateStatus.FAILED }
-        if (failed.isNotEmpty()) {
-            failed.forEach {
-                logger.warn("AppId ${it.appId} failed: ${it.errorMessage} (${it.duration}ms)")
+            if (result.resultMessage.type == MessageType.INCORRECT_PASSWORD || result.resultMessage.type == MessageType.STEAM_GUARD_TIMEOUT) {
+                break
             }
         }
 
-        logger.info("Update summary: ${success.size} successful, ${failed.size} failed out of ${results.size} total")
+        val failed = results.values.filter { it.resultMessage.type != MessageType.SUCCESS }
+        if (failed.isNotEmpty()) {
+            failed.forEach {
+                logger.warn("AppId ${it.appId} failed: ${it.resultMessage.message} (${it.duration}ms)")
+            }
+        }
+
+        logger.info("Update summary: ${results.size - failed.size} successful, ${appIds.size - results.size} skipped, ${failed.size} failed out of ${appIds.size} total")
         return results
     }
 
@@ -55,22 +60,23 @@ class SteamCmdService(
                 logger.warn("No steam cache found for ${properties.username}. Don't forget to accept SteamGuard request.")
             }
 
-            val command = steamCmdCommandService.buildAppUpdateCommand(appId, useFreshSession, properties.cmdValidateInstalled)
-            val (exitCode, resultMessage) = runSteamCmd(command, appId)
+            val command =
+                steamCmdCommandService.buildAppUpdateCommand(appId, useFreshSession, properties.cmdValidateInstalled)
+            val resultMessage = runSteamCmd(command, appId)
             val duration = System.currentTimeMillis() - startTime
-            when {
-                SteamCmdUtils.isNoCredentialCache(resultMessage.message) -> {
+            when (resultMessage.type) {
+                MessageType.NO_CREDENTIAL_CACHE -> {
                     updateApp(appId, true)
                 }
 
-                exitCode == 0 && resultMessage.type == MessageType.SUCCESS -> {
+                MessageType.SUCCESS -> {
                     logger.info(resultMessage.message)
-                    AppUpdateResult(appId, AppUpdateStatus.SUCCESS, duration = duration)
+                    AppUpdateResult(appId, resultMessage, duration = duration)
                 }
 
                 else -> {
                     logger.error(resultMessage.message)
-                    AppUpdateResult(appId, AppUpdateStatus.FAILED, duration = duration)
+                    AppUpdateResult(appId, resultMessage, duration = duration)
                 }
             }
         } catch (ex: Exception) {
@@ -78,14 +84,13 @@ class SteamCmdService(
             logger.error("Error updating appId: $appId", ex)
             AppUpdateResult(
                 appId,
-                AppUpdateStatus.FAILED,
-                errorMessage = ex.message ?: "Unknown error",
+                resultMessage = ResultMessage(ex.message ?: "Unknown error", MessageType.ERROR),
                 duration = duration
             )
         }
     }
 
-    private fun runSteamCmd(command: List<String>, appId: Long = -1L): SteamCmdProcessResult {
+    private fun runSteamCmd(command: List<String>, appId: Long = -1L): ResultMessage {
         val process = ProcessBuilder(command).apply {
             directory(File(properties.cmdRootPath))
             redirectErrorStream(true)
@@ -103,10 +108,8 @@ class SteamCmdService(
             output.toString()
         }
 
-        return SteamCmdProcessResult(
-            process.waitFor(),
-            SteamCmdUtils.extractResultMessage(future.get().lines())
-        )
+        process.waitFor()
+        return defaultOutputHandler.handle(future.get().lines()) ?: ResultMessage()
     }
 
     @PreDestroy
