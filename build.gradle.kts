@@ -17,15 +17,17 @@ java {
 
 repositories {
 	mavenCentral()
-	maven(uri("https://jitpack.io"))
 }
 
 dependencies {
 	// Spring
-	implementation("org.springframework.boot:spring-boot-starter")
+	implementation("org.springframework.boot:spring-boot-starter-web") {
+		exclude(group = "org.springframework.boot", module = "spring-boot-starter-tomcat")
+	}
 
 	// Other
 	implementation("org.jetbrains.kotlin:kotlin-reflect")
+	implementation("com.fasterxml.jackson.module:jackson-module-kotlin")
 
 	// Tests
 	testImplementation("org.springframework.boot:spring-boot-starter-test")

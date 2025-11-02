@@ -4,8 +4,10 @@ import com.github.dontworryimmafine.dsla.config.properties.SteamProperties
 import com.github.dontworryimmafine.dsla.model.AppUpdateResult
 import com.github.dontworryimmafine.dsla.model.MessageType
 import com.github.dontworryimmafine.dsla.model.ResultMessage
+import com.github.dontworryimmafine.dsla.model.SteamApp
 import com.github.dontworryimmafine.dsla.service.consumer.SteamCmdOutputConsumer
 import com.github.dontworryimmafine.dsla.service.handler.OutputHandler
+import com.github.dontworryimmafine.dsla.service.resolver.SteamAppResolver
 import jakarta.annotation.PreDestroy
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
@@ -18,29 +20,32 @@ class SteamCmdService(
     private val properties: SteamProperties,
     private val steamCmdCommandService: SteamCmdCommandService,
     private val consumers: List<SteamCmdOutputConsumer>,
-    private val defaultOutputHandler: OutputHandler
+    private val defaultOutputHandler: OutputHandler,
+    private val steamAppResolver: SteamAppResolver
 ) {
     private val steamCmdProcess = AtomicReference<Process?>(null)
 
-    fun updateApps(appIds: Set<Long>): Map<Long, AppUpdateResult> {
+    fun updateApps(appIds: Set<Long>): Map<SteamApp, AppUpdateResult> {
         if (appIds.isEmpty()) {
-            logger.warn("No app IDs to update")
+            logger.warn("No applications to update")
             return emptyMap()
         }
 
-        logger.info("Starting updates for ${appIds.size} apps")
-
+        val steamApps = steamAppResolver.resolve(appIds)
         val stopConditions = setOf(MessageType.INCORRECT_PASSWORD, MessageType.STEAM_GUARD_TIMEOUT)
-        val results = appIds.asSequence()
-            .map { appId -> appId to updateApp(appId).also { logger.info("Starting update for appId: $appId") } }
+        val results = steamApps.asSequence()
+            .map { steamApp ->
+                logger.info("[$steamApp] Starting update")
+                steamApp to updateApp(steamApp)
+            }
             .takeWhile { (_, result) -> result.resultMessage.type !in stopConditions }
             .toMap()
 
-        logResults(results, appIds.size)
+        logResults(results, steamApps.size)
         return results
     }
 
-    private fun updateApp(appId: Long, useFreshSession: Boolean = false): AppUpdateResult {
+    private fun updateApp(steamApp: SteamApp, useFreshSession: Boolean = false): AppUpdateResult {
         if (useFreshSession) {
             logger.warn("No steam cache found for ${properties.username}. Don't forget to accept SteamGuard request.")
         }
@@ -48,37 +53,37 @@ class SteamCmdService(
         val startTime = System.currentTimeMillis()
         return try {
             val command = steamCmdCommandService
-                .buildAppUpdateCommand(appId, useFreshSession, properties.cmdValidateInstalled)
-            val resultMessage = runSteamCmd(command, appId)
+                .buildAppUpdateCommand(steamApp.appId, useFreshSession, properties.cmdValidateInstalled)
+            val resultMessage = runSteamCmd(command, steamApp)
 
             val duration = System.currentTimeMillis() - startTime
             when (resultMessage.type) {
                 MessageType.NO_CREDENTIAL_CACHE -> {
-                    updateApp(appId, true)
+                    updateApp(steamApp, true)
                 }
 
                 MessageType.ALREADY_UP_TO_DATE, MessageType.SUCCESS -> {
-                    logger.info(resultMessage.message)
-                    AppUpdateResult(appId, resultMessage, duration = duration)
+                    logger.info("[$steamApp] ${resultMessage.message}")
+                    AppUpdateResult(steamApp, resultMessage, duration = duration)
                 }
 
                 else -> {
-                    logger.error(resultMessage.message)
-                    AppUpdateResult(appId, resultMessage, duration = duration)
+                    logger.error("[$steamApp] ${resultMessage.message}")
+                    AppUpdateResult(steamApp, resultMessage, duration = duration)
                 }
             }
         } catch (ex: Exception) {
             val duration = System.currentTimeMillis() - startTime
-            logger.error("Error updating appId: $appId", ex)
+            logger.error("Error updating $steamApp", ex)
             AppUpdateResult(
-                appId,
+                steamApp,
                 resultMessage = ResultMessage(ex.message ?: "Unknown error", MessageType.ERROR),
                 duration = duration
             )
         }
     }
 
-    private fun runSteamCmd(command: List<String>, appId: Long = -1L): ResultMessage {
+    private fun runSteamCmd(command: List<String>, steamApp: SteamApp): ResultMessage {
         val process = ProcessBuilder(command).apply {
             directory(File(properties.cmdRootPath))
             redirectErrorStream(true)
@@ -89,7 +94,7 @@ class SteamCmdService(
             val output = StringBuilder()
             process.inputStream.bufferedReader().use { reader ->
                 reader.forEachLine { line ->
-                    consumers.forEach { it.accept(line, appId) }
+                    consumers.forEach { it.accept(line, steamApp) }
                     output.append(line.trim()).append('\n')
                 }
             }
@@ -100,7 +105,7 @@ class SteamCmdService(
         return defaultOutputHandler.handle(future.get().lines()) ?: ResultMessage()
     }
 
-    private fun logResults(results: Map<Long, AppUpdateResult>, totalApps: Int) {
+    private fun logResults(results: Map<SteamApp, AppUpdateResult>, totalApps: Int) {
         val success = results.values.filter { it.resultMessage.type == MessageType.SUCCESS }
         val failed = results.values.filter {
             it.resultMessage.type != MessageType.SUCCESS &&
@@ -109,7 +114,7 @@ class SteamCmdService(
 
         if (failed.isNotEmpty()) {
             failed.forEach {
-                logger.warn("AppId ${it.appId} failed: ${it.resultMessage.message} (${it.duration}ms)")
+                logger.warn("${it.steamApp} failed: ${it.resultMessage.message} (${it.duration}ms)")
             }
         }
 

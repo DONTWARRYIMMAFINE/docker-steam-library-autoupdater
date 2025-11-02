@@ -12,6 +12,13 @@ spring:
 server:
   shutdown: graceful
 
+app:
+  http-client:
+    steam:
+      base-url: "https://api.steampowered.com"
+      paths:
+        app-list: "/ISteamApps/GetAppList/v2/"
+
 steam:
   schedule: ${SCHEDULE:0 0 0-11 * * *}
   username: ${STEAM_USERNAME:anonymous}
