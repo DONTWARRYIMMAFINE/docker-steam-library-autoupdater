@@ -13,5 +13,5 @@ class DownloadOutputHandler(override val next: OutputHandler? = null) : OutputHa
     }
 
     private fun match(line: String): Boolean =
-        line.contains("downloading", ignoreCase = true)
+        line.contains("downloading, progress", ignoreCase = true)
 }

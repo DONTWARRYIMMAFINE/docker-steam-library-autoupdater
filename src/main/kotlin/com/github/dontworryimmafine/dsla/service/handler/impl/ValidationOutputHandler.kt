@@ -13,6 +13,6 @@ class ValidationOutputHandler(override val next: OutputHandler? = null) : Output
     }
 
     private fun match(line: String): Boolean =
-        line.contains("verifying update", ignoreCase = true) ||
-        line.contains("verifying install", ignoreCase = true)
+        line.contains("verifying update, progress", ignoreCase = true) ||
+        line.contains("verifying install, progress", ignoreCase = true)
 }
