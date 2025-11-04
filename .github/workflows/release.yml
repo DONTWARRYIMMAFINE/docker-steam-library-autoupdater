@@ -4,10 +4,15 @@ on:
   push:
     branches: [ trunk ]
 
+permissions:
+  contents: write
+  packages: write
+
 jobs:
   release:
     name: Create Release and Push to Docker Hub
     runs-on: ubuntu-latest
+
     steps:
       - name: Checkout Code
         uses: actions/checkout@v4
@@ -39,7 +44,6 @@ jobs:
           else
             CHANGES=$(git log --oneline $LATEST_TAG..HEAD --reverse)
           fi
-          # Escape multiline text for GitHub output
           CHANGES="${CHANGES//'%'/'%25'}"
           CHANGES="${CHANGES//$'\n'/'%0A'}"
           CHANGES="${CHANGES//$'\r'/'%0D'}"
@@ -57,6 +61,7 @@ jobs:
       - name: Build and Push Docker Image
         uses: docker/build-push-action@v6
         with:
+          context: .
           push: true
           tags: |
             ${{ vars.DOCKERHUB_USERNAME }}/steam-library-autoupdater:latest
@@ -78,6 +83,9 @@ jobs:
             
             Automated release from trunk branch.
             
+            Docker image: `${{ vars.DOCKERHUB_USERNAME }}/steam-library-autoupdater:v${{ steps.version.outputs.version }}`
+            
+            ### Changes:
             ```
             ${{ steps.changelog.outputs.changes }}
             ```
