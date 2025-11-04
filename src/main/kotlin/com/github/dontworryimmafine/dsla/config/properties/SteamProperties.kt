@@ -6,7 +6,8 @@ import org.springframework.boot.context.properties.bind.ConstructorBinding
 
 @ConfigurationProperties(prefix = "steam")
 data class SteamProperties
-    @ConstructorBinding constructor(
+    @ConstructorBinding
+    constructor(
         val schedule: String,
         val username: String,
         val password: String,

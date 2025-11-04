@@ -7,7 +7,7 @@ import org.springframework.stereotype.Service
 @Service
 class SchedulingService(
     private val appIdResolutionService: AppIdResolutionService,
-    private val steamCmdService: SteamCmdService
+    private val steamCmdService: SteamCmdService,
 ) {
     @Scheduled(cron = "\${steam.schedule}")
     fun scheduledUpdate() {

@@ -11,7 +11,6 @@ import org.springframework.context.annotation.Configuration
 @EnableConfigurationProperties(SteamProperties::class)
 class SteamConfig {
     @Bean
-    fun appIdResolveStrategyMap(appIdResolveStrategies: List<AppIdResolveStrategy>): Map<AppIdResolveStrategyType, AppIdResolveStrategy> {
-        return appIdResolveStrategies.associateBy { it.getType() }
-    }
+    fun appIdResolveStrategyMap(appIdResolveStrategies: List<AppIdResolveStrategy>): Map<AppIdResolveStrategyType, AppIdResolveStrategy> =
+        appIdResolveStrategies.associateBy { it.getType() }
 }

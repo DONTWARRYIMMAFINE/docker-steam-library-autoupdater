@@ -8,7 +8,7 @@ import org.springframework.stereotype.Component
 
 @Component
 class CacheSteamAppResolver(
-    private val steamHttpClient: SteamHttpClient
+    private val steamHttpClient: SteamHttpClient,
 ) : SteamAppResolver {
     private val cache = mutableMapOf<Long, SteamApp>()
 
@@ -34,10 +34,12 @@ class CacheSteamAppResolver(
 
     private fun initializeCache(appIds: Set<Long>) {
         logger.info("Retrieving SteamApps info")
-        val steamAppListResponse = steamHttpClient.getAppList()
-            .asSequence()
-            .filter { it.appId in appIds }
-            .associateBy { it.appId }
+        val steamAppListResponse =
+            steamHttpClient
+                .getAppList()
+                .asSequence()
+                .filter { it.appId in appIds }
+                .associateBy { it.appId }
 
         val unknownAppIds = appIds - steamAppListResponse.keys
         if (unknownAppIds.isNotEmpty()) {

@@ -8,10 +8,13 @@ import org.springframework.stereotype.Component
 @Component
 @ConditionalOnProperty(
     name = ["steam.cmd-filter-output"],
-    havingValue = "false"
+    havingValue = "false",
 )
 class DebugSteamCmdOutputConsumer : SteamCmdOutputConsumer {
-    override fun accept(line: String, steamApp: SteamApp) {
+    override fun accept(
+        line: String,
+        steamApp: SteamApp,
+    ) {
         println(line)
     }
 }

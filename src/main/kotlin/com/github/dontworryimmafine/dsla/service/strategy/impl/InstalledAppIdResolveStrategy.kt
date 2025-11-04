@@ -9,7 +9,7 @@ import java.io.File
 
 @Component
 class InstalledAppIdResolveStrategy(
-    private val properties: SteamProperties
+    private val properties: SteamProperties,
 ) : AppIdResolveStrategy {
     override fun getType(): AppIdResolveStrategyType = AppIdResolveStrategyType.INSTALLED
 
@@ -22,18 +22,24 @@ class InstalledAppIdResolveStrategy(
             return emptySet()
         }
 
-        val appManifests = steamAppsDir.listFiles { file ->
-            file.name.matches(Regex("appmanifest_\\d+\\.acf"))
-        }
+        val appManifests =
+            steamAppsDir.listFiles { file ->
+                file.name.matches(Regex("appmanifest_\\d+\\.acf"))
+            }
 
         if (appManifests.isNullOrEmpty()) {
             logger.warn("No app manifest file exists: ${steamAppsDir.absolutePath}")
             return emptySet()
         }
 
-        val appIds = appManifests.map { file ->
-            file.name.removePrefix("appmanifest_").removeSuffix(".acf").toLong()
-        }.toSet()
+        val appIds =
+            appManifests
+                .map { file ->
+                    file.name
+                        .removePrefix("appmanifest_")
+                        .removeSuffix(".acf")
+                        .toLong()
+                }.toSet()
 
         logger.info("Resolved ${appIds.size} appIds")
         return appIds

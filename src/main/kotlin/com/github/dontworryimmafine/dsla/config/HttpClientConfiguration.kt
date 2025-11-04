@@ -9,13 +9,9 @@ import org.springframework.web.client.RestTemplate
 @Configuration
 class HttpClientConfiguration {
     @Bean
-    fun restTemplate(): RestTemplate {
-        return RestTemplate()
-    }
+    fun restTemplate(): RestTemplate = RestTemplate()
 
     @Bean
     @ConfigurationProperties(prefix = "app.http-client.steam")
-    fun steamHttpClientProperties(): HttpClientProperties {
-        return HttpClientProperties()
-    }
+    fun steamHttpClientProperties(): HttpClientProperties = HttpClientProperties()
 }

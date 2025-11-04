@@ -14,14 +14,16 @@ import org.springframework.web.util.UriComponentsBuilder
 @Component
 class DefaultSteamHttpClient(
     restTemplate: RestTemplate,
-    private val steamHttpClientProperties: HttpClientProperties
-) : AbstractHttpClient(restTemplate), SteamHttpClient {
+    private val steamHttpClientProperties: HttpClientProperties,
+) : AbstractHttpClient(restTemplate),
+    SteamHttpClient {
     override fun getAppList(): List<SteamApp> {
-        val url = UriComponentsBuilder
-            .fromUriString(steamHttpClientProperties.baseUrl)
-            .path(steamHttpClientProperties.getEndpoint(APP_LIST_ENDPOINT))
-            .build()
-            .toUriString()
+        val url =
+            UriComponentsBuilder
+                .fromUriString(steamHttpClientProperties.baseUrl)
+                .path(steamHttpClientProperties.getEndpoint(APP_LIST_ENDPOINT))
+                .build()
+                .toUriString()
 
         return try {
             get(url, SteamAppListResponse::class.java).body?.appList?.apps
