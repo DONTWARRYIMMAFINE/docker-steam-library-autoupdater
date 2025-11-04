@@ -1,0 +1,25 @@
+name: PR Validation
+
+on:
+  pull_request:
+    branches: [ trunk ]
+    types: [opened, synchronize, reopened]
+
+jobs:
+  code-quality:
+    name: Run Code Quality Checks
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Set up JDK
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '17'
+
+      - name: Run Lint and Tests
+        run: |
+          ./gradlew lint
+          ./gradlew test

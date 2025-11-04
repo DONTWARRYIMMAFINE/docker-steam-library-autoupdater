@@ -6,7 +6,7 @@ plugins {
 }
 
 group = "com.github.dontworryimmafine"
-version = "0.0.1-SNAPSHOT"
+version = "0.1.0"
 description = "A Dockerized application to automate the download and update of Steam games from your library. Built on the official `steamcmd` image with secure non-root execution and flexible scheduling."
 
 java {
@@ -38,6 +38,12 @@ dependencies {
 kotlin {
 	compilerOptions {
 		freeCompilerArgs.addAll("-Xjsr305=strict")
+	}
+}
+
+tasks.register("printVersion") {
+	doLast {
+		println(version)
 	}
 }
 

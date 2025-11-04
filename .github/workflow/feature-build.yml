@@ -1,0 +1,35 @@
+name: Feature Branch Build
+
+on:
+  push:
+    branches: [ 'DSLA-*' ]
+
+jobs:
+  build-and-test:
+    name: Build and Test Feature Branch
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Set up JDK
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '17'
+
+      - name: Get Branch Name
+        id: branch
+        run: echo "branch=${GITHUB_REF#refs/heads/}" >> $GITHUB_OUTPUT
+
+      - name: Build and Test
+        run: ./gradlew build
+
+      - name: Build Docker Image (Preview)
+        if: success()
+        uses: docker/build-push-action@v6
+        with:
+          push: false
+          tags: ${{ vars.DOCKERHUB_USERNAME }}/steam-library-autoupdater:feature-${{ steps.branch.outputs.branch }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
