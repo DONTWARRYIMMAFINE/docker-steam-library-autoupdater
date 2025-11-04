@@ -40,14 +40,12 @@ jobs:
         run: |
           LATEST_TAG=$(git describe --tags --abbrev=0 2>/dev/null || echo "")
           if [ -z "$LATEST_TAG" ]; then
-            CHANGES=$(git log --oneline --reverse | head -10)
+            CHANGES=$(git log --oneline -10 --reverse --format=format:"- %s")
           else
-            CHANGES=$(git log --oneline $LATEST_TAG..HEAD --reverse)
+            CHANGES=$(git log --oneline $LATEST_TAG..HEAD --reverse --format=format:"- %s")
           fi
-          CHANGES="${CHANGES//'%'/'%25'}"
-          CHANGES="${CHANGES//$'\n'/'%0A'}"
-          CHANGES="${CHANGES//$'\r'/'%0D'}"
-          echo "changes=$CHANGES" >> $GITHUB_OUTPUT
+          echo "$CHANGES" > CHANGELOG.md
+          cat CHANGELOG.md
 
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
@@ -76,20 +74,15 @@ jobs:
         id: create_release
         uses: softprops/action-gh-release@v2
         with:
-          tag_name: v${{ steps.version.outputs.version }}
-          name: Release v${{ steps.version.outputs.version }}
-          body: |
-            ## Changes in this release
-            
-            Automated release from trunk branch.
-            
-            Docker image: `${{ vars.DOCKERHUB_USERNAME }}/steam-library-autoupdater:v${{ steps.version.outputs.version }}`
-            
-            ### Changes:
-            ```
-            ${{ steps.changelog.outputs.changes }}
-            ```
+          tag_name: ${{ steps.version.outputs.version }}
+          name: Release ${{ steps.version.outputs.version }}
+          body_path: CHANGELOG.md
           draft: false
           prerelease: false
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Print Release Info
+        run: |
+          echo "🎉 Release ${{ steps.version.outputs.version }} created successfully!"
+          echo "🐳 Docker image: ${{ vars.DOCKERHUB_USERNAME }}/steam-library-autoupdater:${{ steps.version.outputs.version }}"
