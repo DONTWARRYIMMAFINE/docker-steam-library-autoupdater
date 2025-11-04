@@ -11,23 +11,23 @@ import org.springframework.scheduling.annotation.EnableScheduling
 @EnableScheduling
 @SpringBootApplication
 class Main(
-	private val schedulingService: SchedulingService
+    private val schedulingService: SchedulingService,
 ) : CommandLineRunner {
-	@PostConstruct
-	fun init() {
-		logger.info("Steam Library Autoupdater initialized")
-	}
+    @PostConstruct
+    fun init() {
+        logger.info("Steam Library Autoupdater initialized")
+    }
 
-	override fun run(vararg args: String?) {
-		logger.info("Steam Library Autoupdater started - performing initial update")
-		schedulingService.performUpdate()
-	}
+    override fun run(vararg args: String?) {
+        logger.info("Steam Library Autoupdater started - performing initial update")
+        schedulingService.performUpdate()
+    }
 
-	companion object {
-		private val logger = LoggerFactory.getLogger(Main::class.java)
-	}
+    companion object {
+        private val logger = LoggerFactory.getLogger(Main::class.java)
+    }
 }
 
 fun main(args: Array<String>) {
-	runApplication<Main>(*args)
+    runApplication<Main>(*args)
 }

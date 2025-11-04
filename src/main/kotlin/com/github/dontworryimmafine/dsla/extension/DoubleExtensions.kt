@@ -3,8 +3,8 @@ package com.github.dontworryimmafine.dsla.extension
 import com.github.dontworryimmafine.dsla.model.DownloadUnit
 import com.github.dontworryimmafine.dsla.model.DownloadUnitType
 
-fun Double.toDownloadUnit(targetType: DownloadUnitType? = null): DownloadUnit {
-    return when (targetType) {
+fun Double.toDownloadUnit(targetType: DownloadUnitType? = null): DownloadUnit =
+    when (targetType) {
         DownloadUnitType.B -> DownloadUnit(this, DownloadUnitType.B)
         DownloadUnitType.KiB -> DownloadUnit(this / 1024, DownloadUnitType.KiB)
         DownloadUnitType.MiB -> DownloadUnit(this / (1024 * 1024), DownloadUnitType.MiB)
@@ -18,4 +18,3 @@ fun Double.toDownloadUnit(targetType: DownloadUnitType? = null): DownloadUnit {
             }
         }
     }
-}

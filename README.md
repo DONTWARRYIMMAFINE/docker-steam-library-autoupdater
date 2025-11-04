@@ -42,7 +42,7 @@ docker run -d \
   -e STEAM_APP_ID_RESOLVE_STRATEGY="MANUAL,INSTALLED" \
   -e STEAM_MANUAL_APP_IDS="730,440" \
   -e STEAM_IGNORE_APP_IDS="520" \
-  dontworryimmafine/docker-steam-library-autoupdater:latest
+  dontworryimmafine/steam-library-autoupdater:latest
 ```
 
 ### Docker Compose
@@ -51,7 +51,7 @@ version: '3.8'
 
 services:
   steam-library-autoupdater:
-    image: dontworryimmafine/docker-steam-library-autoupdater:latest
+    image: dontworryimmafine/steam-library-autoupdater:latest
     container_name: dsla
     restart: unless-stopped
     volumes:

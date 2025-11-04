@@ -5,16 +5,25 @@ import org.springframework.stereotype.Service
 
 @Service
 class SteamCmdCommandService(
-    private val properties: SteamProperties
+    private val properties: SteamProperties,
 ) {
-    fun buildAppUpdateCommand(appId: Long, isPasswordRequired: Boolean = false, validate: Boolean = false): List<String> {
-        return listOfNotNull(
+    fun buildAppUpdateCommand(
+        appId: Long,
+        isPasswordRequired: Boolean = false,
+        validate: Boolean = false,
+    ): List<String> =
+        listOfNotNull(
             "./steamcmd.sh",
-            "+@NoPromptForPassword", "1",
-            "+@sSteamCmdForcePlatformType", "windows",
-            "+login", properties.username, if (isPasswordRequired) properties.password else "",
-            "+app_update", appId.toString(), if (validate) "validate" else null,
-            "+quit"
+            "+@NoPromptForPassword",
+            "1",
+            "+@sSteamCmdForcePlatformType",
+            "windows",
+            "+login",
+            properties.username,
+            if (isPasswordRequired) properties.password else "",
+            "+app_update",
+            appId.toString(),
+            if (validate) "validate" else null,
+            "+quit",
         )
-    }
 }

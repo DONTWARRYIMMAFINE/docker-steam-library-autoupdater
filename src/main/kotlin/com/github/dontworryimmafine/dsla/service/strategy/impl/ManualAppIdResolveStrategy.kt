@@ -8,7 +8,7 @@ import org.springframework.stereotype.Component
 
 @Component
 class ManualAppIdResolveStrategy(
-    private val properties: SteamProperties
+    private val properties: SteamProperties,
 ) : AppIdResolveStrategy {
     override fun getType(): AppIdResolveStrategyType = AppIdResolveStrategyType.MANUAL
 
@@ -19,7 +19,6 @@ class ManualAppIdResolveStrategy(
         if (appIds.isEmpty()) {
             logger.warn("No appIds were provided. Add them to STEAM_MANUAL_APP_IDS environment variable as comma separated list of appIds.")
             return emptySet()
-
         }
 
         logger.info("Resolved ${appIds.size} appIds")

@@ -11,9 +11,12 @@ import kotlin.math.max
 
 @Component
 class ProgressibleSteamCmdOutputConsumer(
-    private val progressibleOutputHandler: OutputHandler
+    private val progressibleOutputHandler: OutputHandler,
 ) : SteamCmdOutputConsumer {
-    override fun accept(line: String, steamApp: SteamApp) {
+    override fun accept(
+        line: String,
+        steamApp: SteamApp,
+    ) {
         val resultMessage = progressibleOutputHandler.handle(listOf(line))
         if (resultMessage?.type == MessageType.DOWNLOADING || resultMessage?.type == MessageType.VALIDATING) {
             val (current, total) = line.toProgressible()

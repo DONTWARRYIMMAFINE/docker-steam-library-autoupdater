@@ -4,17 +4,17 @@ import com.fasterxml.jackson.annotation.JsonProperty
 
 data class SteamAppListResponse(
     @field:JsonProperty("applist")
-    val appList: AppList = AppList()
+    val appList: AppList = AppList(),
 )
 
 data class AppList(
-    val apps: List<SteamApp> = emptyList()
+    val apps: List<SteamApp> = emptyList(),
 )
 
 data class SteamApp(
     @field:JsonProperty("appid")
     val appId: Long,
-    val name: String? = null
+    val name: String? = null,
 ) {
     override fun toString() = name ?: appId.toString()
 }

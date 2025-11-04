@@ -19,9 +19,7 @@ abstract class AbstractHttpClient(
         responseType: Class<T>,
         uriVariables: Map<String, Any> = emptyMap(),
         headers: HttpHeaders = HttpHeaders(),
-    ): ResponseEntity<T> {
-        return executeRequest(url, HttpMethod.GET, null, responseType, uriVariables, headers)
-    }
+    ): ResponseEntity<T> = executeRequest(url, HttpMethod.GET, null, responseType, uriVariables, headers)
 
     private fun <T, R> executeRequest(
         url: String,
@@ -36,17 +34,17 @@ abstract class AbstractHttpClient(
         } catch (ex: HttpClientErrorException) {
             throw HttpClientException(
                 "HTTP Client exception for url $url and method $method. " +
-                        "Status code: ${ex.statusCode.value()}"
+                    "Status code: ${ex.statusCode.value()}",
             )
         } catch (ex: HttpServerErrorException) {
             throw HttpServerException(
                 "HTTP Server exception for url $url and method $method. " +
-                        "Status code: ${ex.statusCode.value()}"
+                    "Status code: ${ex.statusCode.value()}",
             )
         } catch (ex: ResourceAccessException) {
             throw HttpServerException(
                 "ResourceAccessException for url $url and method $method. " +
-                        "Cause: ${ex.message}"
+                    "Cause: ${ex.message}",
             )
         }
     }

@@ -1,0 +1,73 @@
+name: Feature Branch Build
+
+on:
+  push:
+    branches: [ 'DSLA-*' ]
+
+jobs:
+  build-and-push:
+    name: Build and Push Feature Branch
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Set up JDK
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '17'
+
+      - name: Get Branch Name
+        id: branch
+        run: |
+          # Извлекаем чистый номер ветки (убираем 'DSLA-')
+          BRANCH_NAME=${GITHUB_REF#refs/heads/}
+          CLEAN_BRANCH_NAME=${BRANCH_NAME#DSLA-}
+          echo "branch=$BRANCH_NAME" >> $GITHUB_OUTPUT
+          echo "clean_branch_name=$CLEAN_BRANCH_NAME" >> $GITHUB_OUTPUT
+
+      - name: Get App Version from Gradle
+        id: version
+        run: |
+          APP_VERSION=$(./gradlew -q printVersion)
+          echo "version=$APP_VERSION" >> $GITHUB_OUTPUT
+
+      - name: Build and Test
+        run: ./gradlew build
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+        with:
+          driver-opts: |
+            image=moby/buildkit:buildx-stable-1
+
+      - name: Log in to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ vars.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - name: Build and Push Docker Image
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          push: true
+          tags: |
+            ${{ vars.DOCKERHUB_USERNAME }}/steam-library-autoupdater:feature-${{ steps.branch.outputs.clean_branch_name }}
+            ${{ vars.DOCKERHUB_USERNAME }}/steam-library-autoupdater:feature-${{ steps.branch.outputs.clean_branch_name }}-${{ github.sha }}
+          labels: |
+            org.opencontainers.image.version=${{ steps.version.outputs.version }}
+            org.opencontainers.image.source=${{ github.repository_url }}
+            org.opencontainers.image.revision=${{ github.sha }}
+            org.opencontainers.image.branch=${{ steps.branch.outputs.branch }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+          platforms: linux/amd64
+
+      - name: Print Image Info
+        run: |
+          echo "✅ Feature image pushed successfully!"
+          echo "📦 Image tags:"
+          echo "   - ${{ vars.DOCKERHUB_USERNAME }}/steam-library-autoupdater:feature-${{ steps.branch.outputs.clean_branch_name }}"
+          echo "   - ${{ vars.DOCKERHUB_USERNAME }}/steam-library-autoupdater:feature-${{ steps.branch.outputs.clean_branch_name }}-${{ github.sha }}"

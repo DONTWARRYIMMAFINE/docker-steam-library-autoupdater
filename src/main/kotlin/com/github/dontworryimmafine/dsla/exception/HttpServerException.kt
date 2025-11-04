@@ -1,3 +1,5 @@
 package com.github.dontworryimmafine.dsla.exception
 
-class HttpServerException(message: String?) : RuntimeException(message)
+class HttpServerException(
+    message: String?,
+) : RuntimeException(message)
