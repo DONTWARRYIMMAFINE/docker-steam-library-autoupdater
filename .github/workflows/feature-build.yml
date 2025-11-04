@@ -55,7 +55,6 @@ jobs:
           push: true
           tags: |
             ${{ vars.DOCKERHUB_USERNAME }}/steam-library-autoupdater:feature-${{ steps.branch.outputs.clean_branch_name }}
-            ${{ vars.DOCKERHUB_USERNAME }}/steam-library-autoupdater:feature-${{ steps.branch.outputs.clean_branch_name }}-${{ github.sha }}
           labels: |
             org.opencontainers.image.version=${{ steps.version.outputs.version }}
             org.opencontainers.image.source=${{ github.repository_url }}
@@ -70,4 +69,3 @@ jobs:
           echo "✅ Feature image pushed successfully!"
           echo "📦 Image tags:"
           echo "   - ${{ vars.DOCKERHUB_USERNAME }}/steam-library-autoupdater:feature-${{ steps.branch.outputs.clean_branch_name }}"
-          echo "   - ${{ vars.DOCKERHUB_USERNAME }}/steam-library-autoupdater:feature-${{ steps.branch.outputs.clean_branch_name }}-${{ github.sha }}"
