@@ -39,12 +39,44 @@ jobs:
         id: changelog
         run: |
           LATEST_TAG=$(git describe --tags --abbrev=0 2>/dev/null || echo "")
+          
+          get_clean_changelog() {
+            git log --oneline --reverse --format=format:"%s" $@ | \
+              grep -v -E "^(Merge pull request|Merge branch)" | \
+              grep -v -E "^$" | \
+              sed 's/^/- /'
+          }
+          
+          cat > CHANGELOG.md << EOF
+          ## What's New in Version ${{ steps.version.outputs.version }}
+          
+          ### Changes:
+          
+          EOF
+          
           if [ -z "$LATEST_TAG" ]; then
-            CHANGES=$(git log --oneline -10 --reverse --format=format:"- %s")
+            echo "This is the first release of the project! 🎉" >> CHANGELOG.md
+            echo "" >> CHANGELOG.md
+            CHANGES=$(get_clean_changelog -10)
+            if [ -z "$CHANGES" ]; then
+              echo "Initial version of the project." >> CHANGELOG.md
+            else
+              echo "$CHANGES" >> CHANGELOG.md
+            fi
           else
-            CHANGES=$(git log --oneline $LATEST_TAG..HEAD --reverse --format=format:"- %s")
+            CHANGES=$(get_clean_changelog $LATEST_TAG..HEAD)
+            if [ -z "$CHANGES" ]; then
+              echo "This release contains various bug fixes and performance improvements." >> CHANGELOG.md
+            else
+              echo "$CHANGES" >> CHANGELOG.md
+            fi
           fi
-          echo "$CHANGES" > CHANGELOG.md
+          
+          echo "" >> CHANGELOG.md
+          echo "### Docker Image:" >> CHANGELOG.md
+          echo "\`${{ vars.DOCKERHUB_USERNAME }}/steam-library-autoupdater:${{ steps.version.outputs.version }}\`" >> CHANGELOG.md
+          
+          echo "Generated changelog:"
           cat CHANGELOG.md
 
       - name: Set up Docker Buildx
