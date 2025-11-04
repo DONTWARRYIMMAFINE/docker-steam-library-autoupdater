@@ -19,35 +19,43 @@ jobs:
           echo "clean_branch_name=$CLEAN_BRANCH_NAME" >> $GITHUB_OUTPUT
           echo "Cleaning up images for feature branch: $CLEAN_BRANCH_NAME"
 
-      - name: Log in to Docker Hub
-        uses: docker/login-action@v3
-        with:
-          username: ${{ vars.DOCKERHUB_USERNAME }}
-          password: ${{ secrets.DOCKERHUB_TOKEN }}
-
-      - name: Delete Feature Images from Docker Hub
+      - name: Get Docker Hub JWT Token
+        id: dockerhub_auth
         run: |
-          echo "Deleting feature image: ${{ vars.DOCKERHUB_USERNAME }}/steam-library-autoupdater:feature-${{ steps.branch.outputs.clean_branch_name }}"
+          RESPONSE=$(curl -s -X POST \
+            -H "Content-Type: application/json" \
+            -d '{"username": "${{ vars.DOCKERHUB_USERNAME }}", "password": "${{ secrets.DOCKERHUB_TOKEN }}"}' \
+            "https://hub.docker.com/v2/users/login/")
+          
+          TOKEN=$(echo $RESPONSE | jq -r '.token')
+          if [ "$TOKEN" = "null" ] || [ -z "$TOKEN" ]; then
+            echo "Failed to get Docker Hub token"
+            echo "Response: $RESPONSE"
+            exit 1
+          fi
+          echo "token=$TOKEN" >> $GITHUB_OUTPUT
+          echo "Successfully obtained Docker Hub token"
 
-          curl -X DELETE \
-            -H "Authorization: Bearer ${{ secrets.DOCKERHUB_TOKEN }}" \
-            "https://hub.docker.com/v2/repositories/${{ vars.DOCKERHUB_USERNAME }}/steam-library-autoupdater/tags/feature-${{ steps.branch.outputs.clean_branch_name }}/" \
-            || echo "Failed to delete main feature tag (might not exist)"
-
-          TAGS_RESPONSE=$(curl -s -H "Authorization: Bearer ${{ secrets.DOCKERHUB_TOKEN }}" \
-            "https://hub.docker.com/v2/repositories/${{ vars.DOCKERHUB_USERNAME }}/steam-library-autoupdater/tags/?page_size=100")
-
-          echo "$TAGS_RESPONSE" | jq -r '.results[] | select(.name | startswith("feature-'${{ steps.branch.outputs.clean_branch_name }}'-")) | .name' | while read tag; do
-            echo "Deleting SHA-tagged image: ${{ vars.DOCKERHUB_USERNAME }}/steam-library-autoupdater:$tag"
-            curl -X DELETE \
-              -H "Authorization: Bearer ${{ secrets.DOCKERHUB_TOKEN }}" \
-              "https://hub.docker.com/v2/repositories/${{ vars.DOCKERHUB_USERNAME }}/steam-library-autoupdater/tags/$tag/" \
-              || echo "Failed to delete SHA tag: $tag"
-          done
-
-      - name: Confirm Cleanup
+      - name: Delete Feature Image from Docker Hub
         run: |
-          echo "✅ Successfully cleaned up Docker images for feature branch: ${{ steps.branch.outputs.clean_branch_name }}"
-          echo "🗑️ Deleted tags:"
-          echo "   - feature-${{ steps.branch.outputs.clean_branch_name }}"
-          echo "   - feature-${{ steps.branch.outputs.clean_branch_name }}-* (SHA tags)"
+          IMAGE_TAG="feature-${{ steps.branch.outputs.clean_branch_name }}"
+          echo "Deleting feature image: ${{ vars.DOCKERHUB_USERNAME }}/steam-library-autoupdater:$IMAGE_TAG"
+
+          RESPONSE=$(curl -s -o response.txt -w "%{http_code}" -X DELETE \
+            -H "Authorization: Bearer ${{ steps.dockerhub_auth.outputs.token }}" \
+            "https://hub.docker.com/v2/repositories/${{ vars.DOCKERHUB_USERNAME }}/steam-library-autoupdater/tags/$IMAGE_TAG/")
+          
+          if [ "$RESPONSE" -eq 204 ]; then
+            echo "✅ Successfully deleted feature image: $IMAGE_TAG"
+          elif [ "$RESPONSE" -eq 404 ]; then
+            echo "⚠️ Image tag not found: $IMAGE_TAG (might have been already deleted)"
+          else
+            echo "❌ Failed to delete image tag. HTTP status: $RESPONSE"
+            cat response.txt
+            echo ""
+          fi
+
+      - name: Verify Deletion
+        run: |
+          echo "✅ Cleanup completed for feature branch: ${{ steps.branch.outputs.clean_branch_name }}"
+          echo "🗑️ Deleted tag: feature-${{ steps.branch.outputs.clean_branch_name }}"
