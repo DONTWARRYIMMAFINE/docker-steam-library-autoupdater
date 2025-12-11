@@ -19,14 +19,19 @@ server:
 
 app:
   http-client:
-    steam:
+    steam-store:
       base-url: "https://store.steampowered.com"
       paths:
         app-details: "/api/appdetails"
+    steam-api:
+      base-url: "https://api.steampowered.com"
+      paths:
+        player-summary: "/ISteamUser/GetPlayerSummaries/v2/"
 
 steam:
   schedule: ${SCHEDULE:0 0 0-11 * * *}
   web-api-key: ${STEAM_WEB_API_KEY:}
+  steam-id: ${STEAM_ID:}
   username: ${STEAM_USERNAME:anonymous}
   password: ${STEAM_PASSWORD:}
   root-path: ${STEAM_ROOT:/home/steam/Steam}

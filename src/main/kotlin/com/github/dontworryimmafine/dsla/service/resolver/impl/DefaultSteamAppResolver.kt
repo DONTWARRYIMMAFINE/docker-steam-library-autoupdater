@@ -1,6 +1,6 @@
 package com.github.dontworryimmafine.dsla.service.resolver.impl
 
-import com.github.dontworryimmafine.dsla.client.SteamHttpClient
+import com.github.dontworryimmafine.dsla.client.SteamStoreHttpClient
 import com.github.dontworryimmafine.dsla.model.SteamApp
 import com.github.dontworryimmafine.dsla.service.resolver.SteamAppResolver
 import org.slf4j.LoggerFactory
@@ -8,7 +8,7 @@ import org.springframework.stereotype.Component
 
 @Component
 class DefaultSteamAppResolver(
-    private val steamHttpClient: SteamHttpClient,
+    private val steamStoreHttpClient: SteamStoreHttpClient,
 ) : SteamAppResolver {
     override fun resolve(appIds: Set<Long>): List<SteamApp> {
         if (appIds.isEmpty()) {
@@ -16,7 +16,7 @@ class DefaultSteamAppResolver(
             return emptyList()
         }
 
-        return appIds.map { appId -> steamHttpClient.getSteamApp(appId) ?: SteamApp(appId) }
+        return appIds.map { appId -> steamStoreHttpClient.getSteamApp(appId) ?: SteamApp(appId) }
     }
 
     companion object {
