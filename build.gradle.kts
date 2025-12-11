@@ -7,7 +7,7 @@ plugins {
 }
 
 group = "com.github.dontworryimmafine"
-version = "0.1.0"
+version = "0.2.0"
 description =
     "A Dockerized application to automate the download and update of Steam games from your library. Built on the official `steamcmd` image with secure non-root execution and flexible scheduling."
 
@@ -31,6 +31,7 @@ dependencies {
     implementation("org.springframework.boot:spring-boot-starter-web") {
         exclude(group = "org.springframework.boot", module = "spring-boot-starter-tomcat")
     }
+    implementation("org.springframework.boot:spring-boot-starter-cache")
 
     // Other
     implementation("org.jetbrains.kotlin:kotlin-reflect")

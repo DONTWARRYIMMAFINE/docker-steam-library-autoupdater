@@ -6,8 +6,13 @@ spring:
   output:
     ansi:
       enabled: always
+  cache:
+    cache-names: steam-apps-data
+    caffeine:
+      spec: "maximumSize=500"
   config:
-    import: optional:env/application.properties
+    import:
+      - optional:env/application.properties
 
 server:
   shutdown: graceful
@@ -15,12 +20,13 @@ server:
 app:
   http-client:
     steam:
-      base-url: "https://api.steampowered.com"
+      base-url: "https://store.steampowered.com"
       paths:
-        app-list: "/ISteamApps/GetAppList/v2/"
+        app-details: "/api/appdetails"
 
 steam:
   schedule: ${SCHEDULE:0 0 0-11 * * *}
+  web-api-key: ${STEAM_WEB_API_KEY:}
   username: ${STEAM_USERNAME:anonymous}
   password: ${STEAM_PASSWORD:}
   root-path: ${STEAM_ROOT:/home/steam/Steam}
