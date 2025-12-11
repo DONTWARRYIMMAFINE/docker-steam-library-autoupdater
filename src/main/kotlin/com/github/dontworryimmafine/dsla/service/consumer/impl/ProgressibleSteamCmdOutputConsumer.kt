@@ -27,7 +27,7 @@ class ProgressibleSteamCmdOutputConsumer(
 
             val filledWidth = (percent * PROGRESS_BAR_WIDTH / 100).toInt()
             val progress = "=".repeat(filledWidth) + " ".repeat(PROGRESS_BAR_WIDTH - filledWidth)
-            println("[$steamApp] ${resultMessage.type} [$progress] ${"%.2f".format(percent)}% | $currentDownloadUnit / $totalDownloadUnit")
+            print("[$steamApp] ${resultMessage.type} [$progress] ${"%.2f".format(percent)}% | $currentDownloadUnit / $totalDownloadUnit\r")
         }
     }
 

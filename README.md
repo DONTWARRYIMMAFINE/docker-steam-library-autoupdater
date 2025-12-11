@@ -12,18 +12,19 @@ A Dockerized application to automate the download and update of Steam games from
 
 ## Environment Variables
 
-| Variable                        | Required | Default            | Description                                       |
-|---------------------------------|----------|--------------------|---------------------------------------------------|
-| `PUID`                          | No       | `1000`             | User ID for non-root execution                    |
-| `PGID`                          | No       | `1000`             | Group ID for non-root execution                   |
-| `TZ`                            | No       | `Europe/Berlin`    | Time zone                                         |
-| `SCHEDULE`                      | No       | `0 0 0-11 * * *`   | Cron schedule (runs hourly from 12AM to 11AM)     |
-| `STEAM_USERNAME`                | No       | `anonymous`        | Steam account username                            |
-| `STEAM_PASSWORD`                | No       | -                  | Steam account password                            |
-| `STEAM_CMD_FILTER_OUTPUT`       | No       | `true`             | Removes SteamCMD output from console              |
-| `STEAM_CMD_VALIDATE_INSTALLED`  | No       | `false`            | Use validate option during SteamCMD execution     |
-| `STEAM_APP_ID_RESOLVE_STRATEGY` | No       | `MANUAL,INSTALLED` | Comma-separated strategies: `MANUAL`, `INSTALLED` |
-| `STEAM_MANUAL_APP_IDS`          | No       | -                  | Comma-separated app IDs (e.g., `570,440,730`)     |
+| Variable                        | Required | Default            | Description                                                                                              |
+|---------------------------------|----------|--------------------|----------------------------------------------------------------------------------------------------------|
+| `PUID`                          | No       | `1000`             | User ID for non-root execution                                                                           |
+| `PGID`                          | No       | `1000`             | Group ID for non-root execution                                                                          |
+| `TZ`                            | No       | `Europe/Berlin`    | Time zone                                                                                                |
+| `SCHEDULE`                      | No       | `0 0 0-11 * * *`   | Cron schedule (runs hourly from 12AM to 11AM)                                                            |
+| `STEAM_WEB_API_KEY`             | No       | -                  | [Steam Web API Key](https://steamcommunity.com/dev/apikey). Used to obtain game/user data from steam api |
+| `STEAM_USERNAME`                | No       | `anonymous`        | Steam account username                                                                                   |
+| `STEAM_PASSWORD`                | No       | -                  | Steam account password                                                                                   |
+| `STEAM_CMD_FILTER_OUTPUT`       | No       | `true`             | Removes SteamCMD output from console                                                                     |
+| `STEAM_CMD_VALIDATE_INSTALLED`  | No       | `false`            | Use validate option during SteamCMD execution                                                            |
+| `STEAM_APP_ID_RESOLVE_STRATEGY` | No       | `MANUAL,INSTALLED` | Comma-separated strategies: `MANUAL`, `INSTALLED`                                                        |
+| `STEAM_MANUAL_APP_IDS`          | No       | -                  | Comma-separated app IDs (e.g., `570,440,730`)                                                            |
 
 ## Quick Start
 
@@ -37,6 +38,7 @@ docker run -d \
   -e PGID=1000 \
   -e TZ=Europe/Berlin \
   -e SCHEDULE="0 0 0-11 * * *" \
+  -e STEAM_WEB_API_KEY="XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX" \
   -e STEAM_USERNAME="your_username" \
   -e STEAM_PASSWORD="your_password" \
   -e STEAM_APP_ID_RESOLVE_STRATEGY="MANUAL,INSTALLED" \
@@ -61,6 +63,7 @@ services:
       - PGID=1000
       - TZ=Europe/Berlin
       - SCHEDULE=0 0 0-11 * * *
+      - STEAM_WEB_API_KEY=your_steam_web_api_key
       - STEAM_USERNAME=your_username
       - STEAM_PASSWORD=your_password
       - STEAM_APP_ID_RESOLVE_STRATEGY=MANUAL,INSTALLED
