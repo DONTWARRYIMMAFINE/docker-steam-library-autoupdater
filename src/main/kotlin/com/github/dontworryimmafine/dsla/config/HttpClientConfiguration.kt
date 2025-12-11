@@ -12,6 +12,10 @@ class HttpClientConfiguration {
     fun restTemplate(): RestTemplate = RestTemplate()
 
     @Bean
-    @ConfigurationProperties(prefix = "app.http-client.steam")
-    fun steamHttpClientProperties(): HttpClientProperties = HttpClientProperties()
+    @ConfigurationProperties(prefix = "app.http-client.steam-store")
+    fun steamStoreHttpClientProperties(): HttpClientProperties = HttpClientProperties()
+
+    @Bean
+    @ConfigurationProperties(prefix = "app.http-client.steam-api")
+    fun steamApiHttpClientProperties(): HttpClientProperties = HttpClientProperties()
 }

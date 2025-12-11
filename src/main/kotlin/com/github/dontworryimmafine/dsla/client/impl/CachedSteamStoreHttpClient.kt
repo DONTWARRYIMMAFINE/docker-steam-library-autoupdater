@@ -2,7 +2,7 @@ package com.github.dontworryimmafine.dsla.client.impl
 
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.module.kotlin.readValue
-import com.github.dontworryimmafine.dsla.client.SteamHttpClient
+import com.github.dontworryimmafine.dsla.client.SteamStoreHttpClient
 import com.github.dontworryimmafine.dsla.config.properties.HttpClientProperties
 import com.github.dontworryimmafine.dsla.exception.HttpClientException
 import com.github.dontworryimmafine.dsla.model.SteamApiResponse
@@ -15,12 +15,12 @@ import org.springframework.web.client.RestTemplate
 import org.springframework.web.util.UriComponentsBuilder
 
 @Component
-class CachedSteamHttpClient(
+class CachedSteamStoreHttpClient(
     restTemplate: RestTemplate,
     private val objectMapper: ObjectMapper,
-    private val steamHttpClientProperties: HttpClientProperties,
+    private val steamStoreHttpClientProperties: HttpClientProperties,
 ) : AbstractHttpClient(restTemplate),
-    SteamHttpClient {
+    SteamStoreHttpClient {
     @Cacheable(cacheNames = ["steam-apps-data"], unless = "#result == null")
     override fun getSteamApp(appId: Long): SteamApp? {
         val url = buildUrl(appId)
@@ -47,8 +47,8 @@ class CachedSteamHttpClient(
 
     private fun buildUrl(appId: Long): String =
         UriComponentsBuilder
-            .fromUriString(steamHttpClientProperties.baseUrl)
-            .path(steamHttpClientProperties.getEndpoint(APP_DETAILS_ENDPOINT))
+            .fromUriString(steamStoreHttpClientProperties.baseUrl)
+            .path(steamStoreHttpClientProperties.getEndpoint(APP_DETAILS_ENDPOINT))
             .queryParam(APP_IDS_QUERY_PARAM, appId)
             .toUriString()
 
@@ -56,6 +56,6 @@ class CachedSteamHttpClient(
         private const val APP_DETAILS_ENDPOINT = "app-details"
         private const val APP_IDS_QUERY_PARAM = "appids"
 
-        private val logger = LoggerFactory.getLogger(CachedSteamHttpClient::class.java)
+        private val logger = LoggerFactory.getLogger(CachedSteamStoreHttpClient::class.java)
     }
 }

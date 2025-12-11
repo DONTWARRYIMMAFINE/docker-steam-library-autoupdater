@@ -10,6 +10,7 @@ data class SteamProperties
     constructor(
         val schedule: String,
         val webApiKey: String,
+        val steamId: String,
         val username: String,
         val password: String,
         val rootPath: String,

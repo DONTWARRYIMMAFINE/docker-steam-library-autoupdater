@@ -29,6 +29,7 @@ ENV DEBIAN_FRONTEND=noninteractive \
     STEAM_MANUAL_APP_IDS="" \
     STEAM_IGNORE_APP_IDS="" \
     STEAM_WEB_API_KEY="" \
+    STEAM_ID="" \
     STEAM_USERNAME="" \
     STEAM_PASSWORD="" \
     JAVA_OPTS="-Xmx512m -Xms256m -Dfile.encoding=UTF-8"
