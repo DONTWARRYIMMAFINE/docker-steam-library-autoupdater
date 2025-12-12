@@ -32,6 +32,8 @@ dependencies {
         exclude(group = "org.springframework.boot", module = "spring-boot-starter-tomcat")
     }
     implementation("org.springframework.boot:spring-boot-starter-cache")
+    implementation("org.springframework.boot:spring-boot-starter-aop")
+    implementation("org.springframework.integration:spring-integration-core")
 
     // Other
     implementation("org.jetbrains.kotlin:kotlin-reflect")
