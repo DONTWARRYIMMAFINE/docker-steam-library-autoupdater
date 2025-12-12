@@ -109,7 +109,6 @@ class SteamCmdService(
                         output.append(line.trim()).append('\n')
                     }
                 }
-                println()
                 output.toString()
             }
 
