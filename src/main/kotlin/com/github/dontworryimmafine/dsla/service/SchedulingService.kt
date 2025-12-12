@@ -6,29 +6,12 @@ import org.springframework.stereotype.Service
 
 @Service
 class SchedulingService(
-    private val appIdResolutionService: AppIdResolutionService,
-    private val steamCmdService: SteamCmdService,
-    private val steamApiService: SteamApiService,
+    private val steamAppsUpdateService: SteamAppsUpdateService
 ) {
     @Scheduled(cron = "\${steam.schedule}")
     fun scheduledUpdate() {
         logger.info("Starting scheduled update")
-        performUpdate()
-    }
-
-    fun performUpdate() {
-        if (!steamApiService.isAppsUpdateAllowed()) {
-            logger.warn("Update is not allowed right now.")
-            return
-        }
-
-        try {
-            val appIds = appIdResolutionService.resolveAppIds()
-            steamCmdService.updateApps(appIds)
-            logger.info("Update completed")
-        } catch (e: Exception) {
-            logger.error("Update failed", e)
-        }
+        steamAppsUpdateService.performUpdate()
     }
 
     companion object {
