@@ -23,19 +23,12 @@ class ExecutionLockAspect(
         val method = signature.method
 
         val lockKey = executionLock.key.ifBlank { "${joinPoint.target.javaClass.simpleName}.${method.name}" }
-        val timeout = executionLock.timeout
-        val timeUnit = executionLock.timeoutUnit
 
         val lock: Lock = lockRegistry.obtain(lockKey)
-        val acquired =
-            if (timeout > 0) {
-                lock.tryLock(timeout, timeUnit)
-            } else {
-                lock.tryLock()
-            }
+        val acquired = lock.tryLock()
 
         if (!acquired) {
-            logger.error("Unable to acquire execution lock [$lockKey]", method)
+            logger.error("Execution lock: [$lockKey] already exists")
             return null
         }
 
