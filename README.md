@@ -12,20 +12,21 @@ A Dockerized application to automate the download and update of Steam games from
 
 ## Environment Variables
 
-| Variable                        | Required | Default            | Description                                                                                  |
-|---------------------------------|----------|--------------------|----------------------------------------------------------------------------------------------|
-| `PUID`                          | No       | `1000`             | User ID for non-root execution                                                               |
-| `PGID`                          | No       | `1000`             | Group ID for non-root execution                                                              |
-| `TZ`                            | No       | `Europe/Berlin`    | Time zone                                                                                    |
-| `SCHEDULE`                      | No       | `0 0 0-11 * * *`   | Cron schedule (runs hourly from 12AM to 11AM)                                                |
-| `STEAM_WEB_API_KEY`             | No       | -                  | [Steam Web API Key](https://steamcommunity.com/dev/apikey). Used to obtain user information. |
-| `STEAM_ID`                      | No       | -                  | Steam64 ID (ex. 76561197960287930). Used to obtain user status.                              |
-| `STEAM_USERNAME`                | No       | `anonymous`        | Steam account username                                                                       |
-| `STEAM_PASSWORD`                | No       | -                  | Steam account password                                                                       |
-| `STEAM_CMD_FILTER_OUTPUT`       | No       | `true`             | Removes SteamCMD output from console                                                         |
-| `STEAM_CMD_VALIDATE_INSTALLED`  | No       | `false`            | Use validate option during SteamCMD execution                                                |
-| `STEAM_APP_ID_RESOLVE_STRATEGY` | No       | `MANUAL,INSTALLED` | Comma-separated strategies: `MANUAL`, `INSTALLED`                                            |
-| `STEAM_MANUAL_APP_IDS`          | No       | -                  | Comma-separated app IDs (e.g., `570,440,730`)                                                |
+| Variable                        | Required | Default            | Description                                                                                                                          |
+|---------------------------------|----------|--------------------|--------------------------------------------------------------------------------------------------------------------------------------|
+| `PUID`                          | No       | `1000`             | User ID for non-root execution                                                                                                       |
+| `PGID`                          | No       | `1000`             | Group ID for non-root execution                                                                                                      |
+| `TZ`                            | No       | `Europe/Berlin`    | Time zone                                                                                                                            |
+| `SCHEDULE`                      | No       | `0 0 0-11 * * *`   | Cron schedule (runs hourly from 12AM to 11AM)                                                                                        |
+| `STEAM_WEB_API_KEY`             | No       | -                  | [Steam Web API Key](https://steamcommunity.com/dev/apikey). Used to obtain user information.                                         |
+| `STEAM_ID`                      | No       | -                  | Steam64 ID (ex. 76561197960287930). Used to obtain user status.                                                                      |
+| `STEAM_USERNAME`                | No       | `anonymous`        | Steam account username                                                                                                               |
+| `STEAM_PASSWORD`                | No       | -                  | Steam account password                                                                                                               |
+| `STEAM_ALLOWED_STATES`          | No       | `UNKNOWN,OFFLINE`  | Comma-separated steam user state allowed to start update. (OFFLINE,ONLINE,BUSY,AWAY,SNOOZE,LOOKING_TO_TRADE,LOOKING_TO_PLAY,UNKNOWN) |
+| `STEAM_CMD_FILTER_OUTPUT`       | No       | `true`             | Removes SteamCMD output from console                                                                                                 |
+| `STEAM_CMD_VALIDATE_INSTALLED`  | No       | `false`            | Use validate option during SteamCMD execution                                                                                        |
+| `STEAM_APP_ID_RESOLVE_STRATEGY` | No       | `MANUAL,INSTALLED` | Comma-separated strategies: `MANUAL`, `INSTALLED`                                                                                    |
+| `STEAM_MANUAL_APP_IDS`          | No       | -                  | Comma-separated app IDs (e.g., `570,440,730`)                                                                                        |
 
 ## Quick Start
 
@@ -43,6 +44,7 @@ docker run -d \
   -e STEAM_ID="your_steam_id" \
   -e STEAM_USERNAME="your_username" \
   -e STEAM_PASSWORD="your_password" \
+  -e STEAM_ALLOWED_STATES="UNKNOWN,OFFLINE,AWAY,SNOOZE" \
   -e STEAM_APP_ID_RESOLVE_STRATEGY="MANUAL,INSTALLED" \
   -e STEAM_MANUAL_APP_IDS="730,440" \
   -e STEAM_IGNORE_APP_IDS="520" \
@@ -69,6 +71,7 @@ services:
       - STEAM_ID=your_steam_id
       - STEAM_USERNAME=your_username
       - STEAM_PASSWORD=your_password
+      - STEAM_ALLOWED_STATES=UNKNOWN,OFFLINE,AWAY,SNOOZE
       - STEAM_APP_ID_RESOLVE_STRATEGY=MANUAL,INSTALLED
       - STEAM_MANUAL_APP_IDS=730,440
       - STEAM_IGNORE_APP_IDS=520

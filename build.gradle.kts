@@ -7,7 +7,7 @@ plugins {
 }
 
 group = "com.github.dontworryimmafine"
-version = "0.2.1"
+version = "0.2.2"
 description =
     "A Dockerized application to automate the download and update of Steam games from your library. Built on the official `steamcmd` image with secure non-root execution and flexible scheduling."
 

@@ -34,10 +34,11 @@ steam:
   steam-id: ${STEAM_ID:}
   username: ${STEAM_USERNAME:anonymous}
   password: ${STEAM_PASSWORD:}
+  allowed-states: ${STEAM_ALLOWED_STATES:UNKNOWN,OFFLINE}
   root-path: ${STEAM_ROOT:/home/steam/Steam}
   cmd-root-path: ${STEAM_CMD_ROOT:/home/steam/steamcmd}
   cmd-filter-output: ${STEAM_CMD_FILTER_OUTPUT:true}
   cmd-validate-installed: ${STEAM_CMD_VALIDATE_INSTALLED:false}
-  app-id-resolve-strategies: ${STEAM_APP_ID_RESOLVE_STRATEGY:MANUAL}
+  app-id-resolve-strategies: ${STEAM_APP_ID_RESOLVE_STRATEGY:MANUAL,INSTALLED}
   manual-app-ids: ${STEAM_MANUAL_APP_IDS:740}
   ignore-app-ids: ${STEAM_IGNORE_APP_IDS:}

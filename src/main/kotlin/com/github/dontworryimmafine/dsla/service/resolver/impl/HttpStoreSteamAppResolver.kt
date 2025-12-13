@@ -7,7 +7,7 @@ import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Component
 
 @Component
-class DefaultSteamAppResolver(
+class HttpStoreSteamAppResolver(
     private val steamStoreHttpClient: SteamStoreHttpClient,
 ) : SteamAppResolver {
     override fun resolve(appIds: Set<Long>): List<SteamApp> {
@@ -20,6 +20,6 @@ class DefaultSteamAppResolver(
     }
 
     companion object {
-        private val logger = LoggerFactory.getLogger(DefaultSteamAppResolver::class.java)
+        private val logger = LoggerFactory.getLogger(HttpStoreSteamAppResolver::class.java)
     }
 }
