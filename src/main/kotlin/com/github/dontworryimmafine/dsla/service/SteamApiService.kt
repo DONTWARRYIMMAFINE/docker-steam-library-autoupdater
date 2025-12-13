@@ -17,7 +17,7 @@ class SteamApiService(
                 ?: PlayerSummaryState.UNKNOWN
 
         logger.info("Current steam user state: ${playerSummary.name}. Allowed states: ${steamProperties.allowedStates}")
-        return playerSummary in steamProperties.allowedStates
+        return steamProperties.allowedStates.isEmpty() || playerSummary in steamProperties.allowedStates
     }
 
     companion object {

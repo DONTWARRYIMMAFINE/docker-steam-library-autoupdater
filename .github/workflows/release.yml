@@ -38,7 +38,40 @@ jobs:
       - name: Extract Changelog
         id: changelog
         run: |
-          LATEST_TAG=$(git describe --tags --abbrev=0 2>/dev/null || echo "")
+          # Get current version
+          CURRENT_VERSION="${{ steps.version.outputs.version }}"
+          
+          # Get all tags sorted by creation date (newest first)
+          ALL_TAGS=$(git tag --sort=-creatordate)
+          
+          # Find the previous tag (not including current version if it exists)
+          PREVIOUS_TAG=""
+          
+          # First, check if current version already has a tag
+          HAS_CURRENT_TAG=false
+          for tag in $ALL_TAGS; do
+            if [ "$tag" = "$CURRENT_VERSION" ]; then
+              HAS_CURRENT_TAG=true
+            fi
+          done
+          
+          # Find the previous tag
+          if [ "$HAS_CURRENT_TAG" = true ]; then
+            # Skip current version tag and take the next one
+            SKIP_NEXT=false
+            for tag in $ALL_TAGS; do
+              if [ "$SKIP_NEXT" = true ]; then
+                PREVIOUS_TAG="$tag"
+                break
+              fi
+              if [ "$tag" = "$CURRENT_VERSION" ]; then
+                SKIP_NEXT=true
+              fi
+            done
+          else
+            # Current version doesn't have a tag yet, take the latest tag
+            PREVIOUS_TAG=$(echo "$ALL_TAGS" | head -n1)
+          fi
           
           get_clean_changelog() {
             git log --oneline --reverse --format=format:"%s" $@ | \
@@ -48,23 +81,24 @@ jobs:
           }
           
           cat > CHANGELOG.md << EOF
-          ## What's New in Version ${{ steps.version.outputs.version }}
+          ## What's New in Version $CURRENT_VERSION
           
           ### Changes:
           
           EOF
           
-          if [ -z "$LATEST_TAG" ]; then
+          if [ -z "$PREVIOUS_TAG" ]; then
             echo "This is the first release of the project! 🎉" >> CHANGELOG.md
             echo "" >> CHANGELOG.md
-            CHANGES=$(get_clean_changelog -10)
+            CHANGES=$(get_clean_changelog -20)
             if [ -z "$CHANGES" ]; then
               echo "Initial version of the project." >> CHANGELOG.md
             else
               echo "$CHANGES" >> CHANGELOG.md
             fi
           else
-            CHANGES=$(get_clean_changelog $LATEST_TAG..HEAD)
+            # Get all commits since the previous tag
+            CHANGES=$(get_clean_changelog $PREVIOUS_TAG..HEAD)
             if [ -z "$CHANGES" ]; then
               echo "This release contains various bug fixes and performance improvements." >> CHANGELOG.md
             else
@@ -74,9 +108,11 @@ jobs:
           
           echo "" >> CHANGELOG.md
           echo "### Docker Image:" >> CHANGELOG.md
-          echo "\`${{ vars.DOCKERHUB_USERNAME }}/steam-library-autoupdater:${{ steps.version.outputs.version }}\`" >> CHANGELOG.md
+          echo "\`${{ vars.DOCKERHUB_USERNAME }}/steam-library-autoupdater:$CURRENT_VERSION\`" >> CHANGELOG.md
           
           echo "Generated changelog:"
+          echo "Current version: $CURRENT_VERSION"
+          echo "Previous tag used for comparison: $PREVIOUS_TAG"
           cat CHANGELOG.md
 
       - name: Set up Docker Buildx
