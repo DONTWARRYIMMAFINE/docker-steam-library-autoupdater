@@ -13,10 +13,10 @@ class SteamApiService(
 ) {
     fun hasAllowedToUpdateState(): Boolean {
         val playerSummary =
-            steamApiHttpClient.getPlayerSummary()
+            steamApiHttpClient.getPlayerSummary()?.state
                 ?: PlayerSummaryState.UNKNOWN
 
-        logger.info("Current steam user state: $playerSummary. Allowed states: ${steamProperties.allowedStates}")
+        logger.info("Current steam user state: ${playerSummary.name}. Allowed states: ${steamProperties.allowedStates}")
         return playerSummary !in steamProperties.allowedStates
     }
 

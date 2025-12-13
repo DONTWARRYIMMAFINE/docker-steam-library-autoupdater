@@ -24,7 +24,7 @@ class SteamCmdService(
         command: List<String>,
         steamApp: SteamApp,
     ): ResultMessage {
-        logger.info("Starting steamCmd process using command: $command")
+        logger.info("[$steamApp] Starting steamCmd process")
 
         val process =
             ProcessBuilder(command)
