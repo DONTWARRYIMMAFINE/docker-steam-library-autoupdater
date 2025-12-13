@@ -1,6 +1,7 @@
 package com.github.dontworryimmafine.dsla.config.properties
 
 import com.github.dontworryimmafine.dsla.model.AppIdResolveStrategyType
+import com.github.dontworryimmafine.dsla.model.PlayerSummaryState
 import org.springframework.boot.context.properties.ConfigurationProperties
 import org.springframework.boot.context.properties.bind.ConstructorBinding
 
@@ -13,6 +14,7 @@ data class SteamProperties
         val steamId: String,
         val username: String,
         val password: String,
+        val allowedStates: Set<PlayerSummaryState>,
         val rootPath: String,
         val cmdRootPath: String,
         val cmdFilterOutput: String,
