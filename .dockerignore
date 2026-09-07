@@ -76,6 +76,8 @@ kubernetes/
 *.kubeconfig
 
 # Secrets & Config
+data/
+src/main/resources/env/
 .env
 .env.*
 *.key

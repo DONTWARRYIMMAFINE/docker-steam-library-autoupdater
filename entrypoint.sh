@@ -5,7 +5,6 @@
 set -e
 
 APP_USER=steam
-APP_GROUP=steam
 
 source /includes/colors.sh
 
@@ -20,7 +19,11 @@ if [[ "${PUID}" -eq 0 ]] || [[ "${PGID}" -eq 0 ]]; then
 elif [[ "$(id -u steam)" -ne "${PUID}" ]] || [[ "$(id -g steam)" -ne "${PGID}" ]]; then
     ew "> Current $APP_USER user PUID is '$(id -u steam)' and PGID is '$(id -g steam)'"
     ew "> Setting new $APP_USER user PUID to '${PUID}' and PGID to '${PGID}'"
-    groupmod -g "${PGID}" "$APP_GROUP" && usermod -u "${PUID}" -g "${PGID}" "$APP_USER"
+    # Reuse an existing group when the requested GID is already present in the image.
+    if ! getent group "${PGID}" > /dev/null; then
+        groupadd -g "${PGID}" "steam-${PGID}"
+    fi
+    usermod -u "${PUID}" -g "${PGID}" "$APP_USER"
 else
     ew "> Current $APP_USER user PUID is '$(id -u steam)' and PGID is '$(id -g steam)'"
     ew "> PUID and PGID matching what is requested for user $APP_USER"
@@ -31,8 +34,10 @@ if [ ! -d "$STEAM_ROOT" ]; then
     mkdir -p "$STEAM_ROOT"
 fi
 
-chown -R "$APP_USER":"$APP_GROUP" "$STEAM_ROOT"
+# SteamCMD needs write access for self-updates and cached authentication after UID/GID changes.
+chown -R "$APP_USER":"${PGID}" "$STEAM_ROOT" "$STEAM_CMD_ROOT" /home/steam/.steam
 
-ew_nn "> id steam: " ; e "$(id steam)"
+ew_nn "> id steam: "
+e "$(id steam)"
 
-exec gosu $APP_USER:$APP_GROUP "$@"
+exec gosu "$APP_USER:${PGID}" "$@"
