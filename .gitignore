@@ -41,3 +41,9 @@ out/
 
 ### Env ###
 */**/env/*
+
+### AI ###
+/.agents/*
+/skills-lock.json
+/docs/*
+/data/*

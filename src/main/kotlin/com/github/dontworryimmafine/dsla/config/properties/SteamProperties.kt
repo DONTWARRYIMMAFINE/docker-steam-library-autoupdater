@@ -4,6 +4,7 @@ import com.github.dontworryimmafine.dsla.model.AppIdResolveStrategyType
 import com.github.dontworryimmafine.dsla.model.PlayerSummaryState
 import org.springframework.boot.context.properties.ConfigurationProperties
 import org.springframework.boot.context.properties.bind.ConstructorBinding
+import java.time.Duration
 
 @ConfigurationProperties(prefix = "steam")
 data class SteamProperties
@@ -22,4 +23,5 @@ data class SteamProperties
         val appIdResolveStrategies: Set<AppIdResolveStrategyType>,
         val manualAppIds: Set<Long>,
         val ignoreAppIds: Set<Long>,
+        val cmdLoginCooldown: Duration = Duration.ofHours(1),
     )
